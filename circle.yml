@@ -18,7 +18,7 @@ test:
     - ip route | awk '/docker0/ { print $NF }' > myip.txt
     - echo 'DBI:mysql:dbname=circle_test;host=dockerhost;user=ubuntu' > dsn.txt
     - mkdir config
-    - echo '{"dsns":{"antenna":'`cat dsn.txt`'},"alt_dsns":{"master":{"antenna":'`cat dsn.txt`'}}}' > config/config.json
+    - echo '{"dsns":{"antenna":"'`cat dsn.txt`'"},"alt_dsns":{"master":{"antenna":"'`cat dsn.txt`'"}}}' > config/config.json
     - docker run --name server -d -p 5511:8080 -e APP_CONFIG=/config/config.json -v `cd config && pwd`:/config --add-host=dockerhost:`cat myip.txt` quay.io/suikawiki/swantenna /server; sleep 10
     - curl -f http://localhost:5511/radio/
     - curl -f http://localhost:5511/radio/css
