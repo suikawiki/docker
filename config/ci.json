@@ -1,0 +1,30 @@
+{
+  "circleci": {
+    "required_docker_images": ["quay.io/wakaba/docker-perl-app-base"],
+    "build": [
+      "git clone https://bitbucket.org/wakabatan/swantenna repo",
+      "cd repo && git checkout -b radio origin/radio",
+      "cd repo && git submodule update --init",
+      "docker build -t quay.io/suikawiki/swantenna repo"
+    ],
+    "tests": [
+      "mysql -u ubuntu circle_test < repo/db/*.sql",
+      "ip route | awk '/docker0/ { print $NF }' > myip.txt",
+      "echo 'DBI:mysql:dbname=circle_test;host=dockerhost;user=ubuntu' > dsn.txt",
+      "mkdir config",
+      "echo '{\u0022dsns\u0022:{\u0022antenna\u0022:\u0022'`cat dsn.txt`'\u0022},\u0022alt_dsns\u0022:{\u0022master\u0022:{\u0022antenna\u0022:\u0022'`cat dsn.txt`'\u0022}}}' > config/config.json",
+      "docker run --name server -d -p 5511:8080 -e APP_CONFIG=/config/config.json -v `cd config && pwd`:/config --add-host=dockerhost:`cat myip.txt` quay.io/suikawiki/swantenna /server; sleep 10",
+      "#XXX curl -f http://localhost:5511/radio/",
+      "curl -f http://localhost:5511/radio/css",
+      "docker logs server"
+    ],
+    "deploy": {
+      "branch": "antenna",
+      "commands": [
+        "docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS quay.io",
+        "docker push quay.io/suikawiki/swantenna"
+      ]
+    },
+    "gaa": true
+  }
+}
