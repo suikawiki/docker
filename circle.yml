@@ -32,7 +32,6 @@
          "mysql -u ubuntu circle_test \u003C repo/db/*.sql",
          "ip route | awk '/docker0/ { print $NF }' > myip.txt",
          "echo 'DBI:mysql:dbname=circle_test;host=dockerhost;user=ubuntu' > dsn.txt",
-         "mkdir config",
          "echo '{\u0022dsns\u0022:{\u0022antenna\u0022:\u0022'`cat dsn.txt`'\u0022},\u0022alt_dsns\u0022:{\u0022master\u0022:{\u0022antenna\u0022:\u0022'`cat dsn.txt`'\u0022}}}' > config/config.json",
          "docker run --name server -d -p 5511:8080 -e APP_CONFIG=/config/config.json -v `cd config && pwd`:/config --add-host=dockerhost:`cat myip.txt` quay.io/suikawiki/swantenna /server; sleep 10",
          "#XXX curl -f http://localhost:5511/radio/",
